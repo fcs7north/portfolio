@@ -1,0 +1,39 @@
+html { font-size: 20px;}
+
+body {
+	padding: 0;
+	margin: 0;
+	font-size: 1rem;
+}
+
+#container {
+	display: grid;
+	/* grid-column: repeat(auto-fill, minmax(100px, 1fr)); */
+	/* grid-template-columns: repeat(3, 1fr); */
+	/* grid-template-rows: repeat(3, 100px); */
+	/* grid-template-areas:
+		"area-1 area-2 area-2"
+		"area-1 area-3 area-3"
+		"area-5 area-3 area-3"
+		"area-5    .   area-4"
+		"area-6 area-6 area-6"
+	; */
+
+	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+	gap: .5rem .5rem;
+
+	max-width: 1024px;
+	margin: 0 auto;
+}
+
+#container > div {
+	background: chocolate;
+	color: white;
+}
+
+#container div.area-1 { /* grid-area: area-1 */ }
+#container div.area-2 { /* grid-area: area-2 */ }
+#container div.area-3 { /* grid-area: area-3 */ }
+#container div.area-4 { /* grid-area: area-4 */ }
+#container div.area-5 { /* grid-area: area-5 */ }
+#container div.area-6 { /* grid-area: area-6 */ }
