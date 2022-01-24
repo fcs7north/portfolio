@@ -1,0 +1,719 @@
+// https://heropy.blog/2018/01/31/sass/ 참조
+
+// 컴파일 안됨
+/* 
+	컴파일 됨
+*/
+
+div {
+	span {
+		b {
+			padding: 2px;
+		}
+
+		// &는 root 를 치환해 준다 (주의: 현재의 루트는 span, div 아님)
+		// span(치환) + :last-child = div:last-child
+		&:last-child {
+			color: red;
+		}
+		// span(치환) + ::before = div::before
+		&::before {
+			content: "앞쪽에";
+		}
+	}
+}
+
+.st {
+	$fontSize: large;
+
+	// .st(치환) + -small = .st-small (응용해서 새로운 클래스도 생성가능)
+	&-small {
+		color: black;
+	}
+
+	// @at-root : 중첩 벗어나기
+	@at-root .box {
+		font-size: $fontSize;
+	}
+}
+// @at-root : 중첩 벗어나기 결과
+// *** 변수를 사용하기 위해서는 범위 안에 있어야 하기 때문에 사용
+// .box {
+// 	font-size: $fontSize;
+// }
+
+.box {
+	// 이렇게 하면 된다는데, 꼭 필요한 지는 모르겠음 -_-a
+	font: {
+		weight: bold;
+		size: 1rem;
+		style: normal;
+	};
+	margin: {
+		top: 20px;
+		bottom: 20px;
+		left: 0px;
+		right: 20px;
+	};
+}
+
+
+// ================================= 변수 =================================
+// (형식) 변수이름: 속성값
+// 유효 범위는 선언된 블록({}) 내부에서만
+$max-width: 1024px;
+$def-width: 320px;
+$bg-src: "/assets/imgs/main-img.jpg";
+
+#wrapper {
+	width: $max-width;
+	background: url($bg-src) center center no-repeat;
+
+	#container {
+		width: $def-width;
+	}
+
+	&-inbox {
+		width: $def-width;
+	}
+}
+
+// 변수 재할당 가능
+// 너비나 높이 등 계산이 필요할 경우 유용할 듯
+#main-wrap {
+	$re-max-width: $max-width * 2 !global;
+	$re-bg-src: $bg-src;
+	$re-def-width: $def-width * 2;
+
+	section {
+		width: $re-max-width;
+		background: url($re-bg-src) center center no-repeat;
+	}
+
+	article {
+		width: $re-def-width;
+	}
+}
+
+// !global 로 변수 전역 선언 가능
+.global-box {
+	width: $re-max-width * 2;
+
+	// 동일한 변수를 전역처리 할 경우, 값이 덮어 씌워짐
+	$re-max-width: $re-max-width * 4 !global;
+}
+
+.global-box-2 {
+	width: $re-max-width;
+}
+
+// !default 로 덮어쓰기를 방지할 수 있다
+.global-box-3 {
+	$re-max-width: 999999px !default;
+
+	// !default 선언으로 동일한 변수명이 있으므로, 이전 값이 적용됨
+	&-defbox {
+		width: $re-max-width;
+	}
+}
+
+
+// ================================= #{} 문자보간 =================================
+// #{} 를 사용하여, 코드의 어디든지 변수값 추가 가능
+// unquote() 는 "" 를 제거해 준다
+$fontFamily: unquote("Neonderthaw&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=#{$fontFamily}");
+
+
+// ================================= Import 가져오기 =================================
+// Sass @import
+// 	Sass 파일을 import 함
+// 	단, 다음의 상황에서는 CSS @import 규칙 적용하여 컴파일
+// 		확장자 .css 일 때
+// 		파일명이 "http://" 로 시작할 때
+// 		"url()"이 붙을 경우
+// 		미디어쿼리가 있을 때
+
+// 위의 경우에는 CSS @import 규칙대로 컴파일 됨
+
+// @import "style.css";
+// @import "https://my.css.com/style";
+// @import url(my.style.com);
+// @import "style" screen;
+
+
+// ================================= 여러파일 가져오기 =================================
+// , 로 구분
+// @import "header", "aside", "footer"
+
+
+// ================================= 파일 분할(Partials) =================================
+// 너무 많은 .css 파일이 생성되면 성능 저하나 관리가 어려워 질 수 있으므로 Partials 기능을 사용할 수 있음
+// _header.scss 처럼, 앞에 "_" 가 붙은 파일의 경우 @import 로 가져오면 .css 파일로 컴파일 하지 않음
+// 다음의 경우 aside.scss 만 css 파일이 생성됨
+@import "header", "footer", "aside.scss";
+
+
+// ================================= 연산(Operations) =================================
+// px 단위로 연산을 할 경우외에,
+// %, em, vw 등 상대 단위로 연산을 해야할 경우 calc() 로 해야 함
+#operation {
+	div {
+		width: calc(40px * 70%);
+	}
+}
+
+// 나눗셈의 연산시 주의 사항
+#nanugi {
+	// 값 또는 일부가 변수에 저장되거나 함수에 의해 반환되어야 함
+	$wh: 100px;
+	width: $wh / 7;
+
+	// 계산식이 ()로 묶여 있을 것
+	height: (200px / 5);
+
+	// 값이 다른 계산식의 일부여야 한다
+	font-size: 10px * 2 / 4;
+}
+
+// 문자 연산
+#munja::after {
+	// + 사용
+	// 결과는 첫 번째를 기준으로 따옴표 처리 됨
+	// 첫 번째에 "" 가 붙었으므로, 결과값은 전체에 "" 처리
+	content: "Never " + "Stop!! " + Now;
+
+	// 첫 번째에 "" 가 없으므로, 전체에도 적용 안됨
+	display: inline + "-flex";
+	flex-flow: column + "-reverse" + " " + "no-" + wrap;
+}
+
+// 색상 연산
+#colorBox {
+	// 두 자리씩 계산
+	// R: 11 + 55
+	// G: 22 + 66
+	// B: 33 + 44
+	color: #112233 + #556644;
+
+	// 두 자리씩 계산은 위와 동일
+	// 단 알파값은 반드시 동일해야 함
+	background: rgba(50, 100, 150, .5) + rgba(10, 20, 30, .5);
+
+	$color: rgba(20, 40, 60, .5);
+	span {
+		color: $color;
+	}
+
+	div {
+		// 알파값을 계산하려면 
+		// opatify() - 불투명하게, transparentize() - 투명하게, 함수를 사용할 수 있다
+
+		// + .3과 같음, .3만큼 더 불투명해 짐
+		color: opacify($color, .3);
+		// - .1과 같음, .1만큼 더 투명해 짐
+		background-color: transparentize($color, .3);
+	}
+}
+
+
+// ================================= 논리(Boolean) =================================
+// and, or, not
+#Booleans {
+	$wh: 1010px;
+	div {
+		@if ($wh > 1000px) {
+			height: 20px;
+		} @else {
+			height: 400px;
+		}
+	}
+	
+	span {
+		@if not ($wh > 1000px) {
+			color: red;
+		} @else {
+			color: blue;
+		}
+	}
+}
+
+
+// ================================= 재활용(Mixins) =================================
+// 선언( @mixin )한 후, 사용( @include )
+
+// 선언하기
+@mixin make-mixin {
+	$colors: red;
+	
+	display: inline-block;
+	color: $colors;
+	font: {
+		size: 2rem;
+		family: verdana;
+		style: normal;
+		weight: bold;
+	};
+	
+	&::before {
+		content: "루트 참조도 가능함!!";
+	}
+	
+	span {
+		background: url("/assets/imgs/main-img.jpg");
+	}
+}
+
+// 인수 추가하여 선언하기 (기본값 사용가능)
+@mixin make-mixin-arg ($border-width: 5px, $border-type: solid, $border-color: red) {
+	display: block;
+	box-sizing: border-box;
+	border: $border-width $border-type $border-color;
+	font: {
+		size: $border-width * 10;
+		family: tahoma;
+	}
+	color: $border-color;
+}
+
+// 사용하기
+#use-mixin {
+	@include make-mixin;
+	
+}
+
+#use-mixin-args {
+	// 사용하기 + 인수
+	@include make-mixin-arg (2px, dashed, rgba(10, 20, 30, .7));
+}
+#use-mixin-args-def {
+	// 사용하기 + 인수(기본값)
+	@include make-mixin-arg;
+}
+
+// 명시적으로 키워드를 입력하여 작성
+@mixin position (
+	$p: absolute,
+	$t: null,
+	$b: null,
+	$l: null,
+	$r: null
+	) {
+		position: $p;
+		top: $t;
+		bottom: $b;
+		left: $l;
+		right: $r;
+	}
+	
+	// 사용
+	#use-keyword-position {
+		@include position($b: 50px, $r: 100px);
+}
+
+#use-keyword-fixed {
+	@include position($p: fixed, $t: 10px, $l: 40px);
+}
+
+
+// ================================= 가변 인수(Variable Arguments) =================================
+// 매개 변수에 ... 을 붙임(변수의 수가 유동적일 경우 사용)
+@mixin gabunMx($wd, $hg, $bg-values...) {
+	width: $wd;
+	height: $hg;
+	background: $bg-values;
+}
+
+#bgStatus {
+	@include gabunMx(
+		200px,
+		300px,
+		url("/assets/imgs/main-img.jpg") center center no-repeat,
+		url("/assets/imgs/main-img.jpg") no-repeat,
+		url("/assets/imgs/main-img.jpg")
+	);
+}
+
+// 반대로 적용, 가변 인수를 전달하여 적용
+@mixin font(
+	$style: italic,
+	$weight: bold,
+	$size: 2rem,
+	$family: verdana
+) {
+	font: {
+		style: $style;
+		weight: $weight;
+		size: $size;
+		family: $family;
+	};
+}
+
+#testFont {
+	div {
+		// 가변인수를 만들어 추가
+		$font-vals: normal, normal, 4rem, sans-serif;
+		@include font($font-vals...)
+	}
+
+	span {
+		// 필요한 값만 변수로 만들어 전달
+		$font-vals: (style: normal, family: tahoma);
+		@include font($font-vals...)
+	}
+
+	a {
+		// 변수 없이 ()로 전달
+		@include font((weight: normal, size: 5rem)...)
+	}
+}
+
+// @content 기능으로 블럭에 속성 추가 가능
+@mixin useContent($display) {
+	&::after {
+		display: $display;
+		@content;
+	}
+}
+#useContent {
+	div {
+		@include useContent(block);
+	}
+
+	span {
+		@include useContent(inline-block) {
+			position: absolute;
+			left: 20px;
+			top: 20px;
+			content: "콘텐츠 기능 추가 테스트!!!"
+		};
+	}
+}
+
+@mixin ct-colors($color: green) {
+	/* 기본컬러 green */
+	// @mixin 에서 @content 로 명시한 부분은 추후에 사용자정의 가능
+	@content; // 사용자 정의값이 들어감
+
+	// 전역변수가 있더라도 이 값음 ct-colors 의 $color 값으로 적용
+	background-color: $color;
+	border-color: $color;
+}
+
+#color-test {
+	$color: red;
+
+	div {
+		@include ct-colors() {
+			// 전역변수 적용 $color: red
+			color: $color;
+		}
+	}
+	
+	span {
+		@include ct-colors($color: black) {
+			display: inline-block;
+			position: absolute;
+			left: 10px;
+			top: 10px;
+			font-size: 5rem;
+			
+			// 전역변수 적용 $color: red
+			color: $color;
+		}
+	}
+}
+
+
+// ================================= 확장(Extend) =================================
+// 타겟 속성을 모두 가져옴
+// 추천되지 않음 (부작용 있을 수 있음)
+.ori-class {
+	position: relative;
+	left: 10px;
+	top: 10px;
+	padding: 2rem;
+	margin: 2rem;
+	background-color: cadetblue;
+
+	&::after {
+		content: "이런저런 테스팅!";
+		@include ct-colors();
+	}
+}
+
+.clone-class {
+	font-size: 2rem;
+	@extend .ori-class;
+}
+
+
+// ================================= 함수(Functions) =================================
+// mixin 과 유사하지만, 연산된 값을 반환한다는 점이 다름
+// @include 사용 않고, 함수명을 바로 사용
+// 내장 함수(예: red())와 충돌하지 않도록 접두어 붙이는 것 추천
+$reset-def-width: 1024px;
+
+@function reset-width($count: 1, $of-num: 8) {
+	@return $reset-def-width * ($count / $of-num);
+}
+
+#reset-width-test {
+	div {
+		width: reset-width(5);
+	}
+
+	span {
+		width: reset-width(2);
+	}
+
+	em {
+		width: reset-width();
+	}
+
+	b {
+		width: reset-width(1, 2);
+	}
+}
+
+
+// ================================= 조건과 반복(Control Directives / Expressions) =================================
+// 삼항문과 비슷
+#samhangmun {
+	$wh: 900px;
+	$per: 100%;
+
+	div {
+		// 조건이 맞을 경우만 출력
+		width: if($wh < 800, $wh, $per);
+		// if 문 외에 속성이 없으면 전체 출력 안됨
+		height: 200px;
+		background-color: red;
+	}
+}
+
+// @if
+#ifmuntest {
+	$wh: 300px;
+	$color: white;
+
+	@if($wh > 300) {
+		$color: red;
+
+		// () 는 생략 가능
+	} @else if $wh == 300 {
+		$color: blue;
+	} @else {
+		$color: $color;
+	}
+
+	span {
+		color: $color;
+	}
+}
+
+// @if 조건에 and, or, not 사용가능
+@function reSizable($reSize) {
+	$returnVal: 1000px;
+	@if $reSize > 100 and $reSize < 300 {
+		$returnVal: 250px;
+	} @else if $reSize == 2000 {
+		$returnVal: 1500px;
+	}
+
+	@return $returnVal;
+}
+
+#ifAndOrNotTest {
+	$color: orange;
+	$wh: 300px;
+
+	div {
+		@if $color == orange and $wh == 300 {
+			width: 100%;
+		} @else {
+			width: 999px;
+		}
+	}
+
+	span {
+		width: reSizable(200);
+	}
+}
+
+// 내장함수 "unitless"는 단위문자가 없으면 true, 있으면 false 반환
+// 이를 이용하여 @mixin 을 생성할 수 있다
+@mixin jnet-unitless($w, $h, $p: absolute) {
+	@if($p == absolute or $p == fixed)
+	{
+		width: if(unitless($w), #{$w}px, $w);
+		height: if(unitless($h), #{$h}px, $h);
+		position: $p;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		margin: 0 auto;
+		padding: 0;
+	}
+}
+
+#jnet-unitless-test {
+	div {
+		@include jnet-unitless(200, 200);
+	}
+	span {
+		@include jnet-unitless(300px, 100);
+	}
+	em {
+		@include jnet-unitless(20px, 20px, relative)
+	}
+}
+
+// @for  반복문 for와 유사
+// through 와 to 를 사용하는 형식으로 나뉨
+// to 는 끝나는 3을 포함하지 않음
+@for $num from 1 to 3 {
+	#for-to-test:nth-child(#{$num}) {
+		width: 50px * $num;
+	}
+}
+
+// through 는 끝나는 3을 포함
+@for $num from 1 through 3 {
+	#for-through-test:nth-child(#{$num}) {
+		width: 20px * $num;
+	}
+}
+
+
+// @each   for in 문과 유사
+#jnet-each-test {
+	$animals: (monkey, rion, tiger, dog, cat);
+	ul {
+		@each $animal in $animals {
+
+			// index 값으로 계산이 필요하다면?
+			$a: index($animals, $animal);
+
+			li.#{$animal} {
+				z-index: $a;
+				width: $a * 100px;
+				background: url("/assets/imgs/#{$animal}.jpg");
+			}
+		}
+	}
+}
+
+// 두개 이상의 배열 동시 사용 가능
+// 단, length 가 같아야 함
+#each-n-test {
+	$grp-a: (aaa1, bbb1, ccc1);
+	$grp-b: (aaa2, bbb2, ccc2);
+	$grp-c: (aaa3, bbb3, ccc3);
+	$grp-d: (aaa4, bbb4, ccc4);
+	$grp-e: (aaa5, bbb5, ccc5);
+
+	ul {
+		@each $a, $b, $c in $grp-a, $grp-b, $grp-c, $grp-d, $grp-e {
+
+			$idx: index($grp-a, $a);
+
+			li.#{$a} {
+				z-index: $idx;
+				background: url("/assets/imgs/#{$b}.jpg") left top no-repeat, url("/assets/imgs/#{$c}.jpg");
+			}
+		} 
+	}
+}
+
+// Map 데이터 반복 형식
+// 키: 값 으로 된 데이터 필요
+#each-key-val-test {
+	$map-data: (
+		// class-name: img-name
+		box-a: cats,
+		box-b: dogs,
+		box-c: rions
+	);
+
+	div {
+		@each $key, $val in $map-data {
+			p.#{$key} {
+				background: url("/assets/imgs/#{$val}.jpg");
+			}
+		}
+	}
+}
+
+// while 문
+// 조건이 false 가 될 때까지 반복
+// 무한 루프 함정 있음, 권장하지 않음
+#while-test {
+	$i: 10;
+
+	@while $i > 0 {
+		div.while-box-#{$i} {
+			width: 5px * $i;
+		}
+		$i: $i - 2;
+	}
+}
+
+
+// ================================= 내장 함수(Built-in Functions) =================================
+
+// ********** 색상(RGB / HSL / Opacity) 함수 **********
+// mix($color1, $color2) : 두 개의 색 더하기
+// lighten($color, $amount) : 더 밝은 색으로
+// darken($color, $amount) : 더 어두운 색으로
+// saturate($color, $amount) : 채도 증가
+// desaturate($color, $amount) : 채도 감소
+// grayscale($color) : 그레이 스케일로
+// invert($color) : 색상 반전
+// rgba($color, $alpha) : 투명도 조정
+// opacify($color, $amount) / fade-in($color, $amount) : 더 불투명하게
+// transparentize($color, $amount) / fade-out($color, $amount) : 더 투명하게
+
+// ********** 문자(String) 함수 **********
+// unquote($string) : 따옴표 제거
+// quote($string) : 따옴표 추가
+// str-insert($string, $insert, $index) : index에 특정 문자 추가
+// str-index($string, $substring) : 특정 문자의 첫 index 반환
+// str-slice($string, $start-at, [$end-at]) : 특정 문자(start-at 부터 $end-at(생략가능))를 추출
+// to-upper-case($string) : 대문자로
+// to-lower-case($string) : 소문자로
+
+// ********** 숫자(Number) 함수 **********
+// percentage($number) : 백분율로 변환
+// round($number) : 반올림
+// ceil($number) : 올림
+// floor($number) : 내림
+// abs($number) : 절대 값
+// min($numbers…) : $numbers 중 최소 값
+// max($numbers…) :    "     중 최대 값
+// random() : 0 ~ 1 사이 난수 생성
+
+// ********** List 함수 **********
+// 모든 List 내장 함수는 기존 List 데이터를 갱신하지 않고 새 List 데이터를 반환
+// 모든 List 내장 함수는 Map 데이터에서도 사용가능
+
+// length($list) : List의 개수 반환
+// nth($list, $n) : List에서 n번째 값 반환
+// set-nth($list, $n, $value) : List에서 n번째 값을 다른 값으로 변경
+// join($list1, $list2, [$separator]) : 두 개의 List를 하나로 결합
+// zip($lists…) : 여러 List들을 하나의 다차원 List로 결합
+// index($list, $value) : List에서 특정 값의 index를 반환
+
+// ********** Map 함수 **********
+// 모든 Map 내장 함수는 기존 Map 데이터를 갱신하지 않고 새 Map 데이터를 반환
+// map-get($map, $key) : Map에서 특정 key의 value를 반환
+// map-merge($map1, $map2) : 두 개의 Map 을 병합하여 새로운 Map 생성
+// map-keys($map) : Map 에서 모든 key를 List로 반환
+// map-values($map) : Map에서 모든 value를 List로 반환
+
+// ********** 관리(Introspection) 함수 **********
+// variable-exists(name) : 변수가 현재 범위에 존재하는지 여부를 반환 (인수는 $없이 변수의 이름만 사용)
+// unit($number) : 숫자의 단위 반환
+// unitless($number) : 숫자에 단위가 있는지 여부를 반환
+// comparable($number1, $number2) : 두 개의 숫자가 연산 가능한지 여부를 반환

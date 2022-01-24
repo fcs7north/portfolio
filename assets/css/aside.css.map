@@ -1,0 +1,9 @@
+{
+    "version": 3,
+    "mappings": "AAAA,AAGC,MAHK,CAGL,GAAG,CAAC;EACH,SAAS,EAHM,IAAI;CAInB",
+    "sources": [
+        "../../sass/aside.scss"
+    ],
+    "names": [],
+    "file": "aside.css"
+}
